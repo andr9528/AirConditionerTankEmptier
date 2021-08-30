@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30621.155
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mail", "Mail\Mail.csproj", "{99AC5E4A-A0E6-4AC3-9117-F1BB800E4B89}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wolf.Utility.Core", "..\Wolf.Utility.Core\Wolf.Utility.Core\Wolf.Utility.Core.csproj", "{B4E41E52-2EA3-4C08-BEC9-5E5D7DA0E97B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{99AC5E4A-A0E6-4AC3-9117-F1BB800E4B89}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{99AC5E4A-A0E6-4AC3-9117-F1BB800E4B89}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{99AC5E4A-A0E6-4AC3-9117-F1BB800E4B89}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{99AC5E4A-A0E6-4AC3-9117-F1BB800E4B89}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B4E41E52-2EA3-4C08-BEC9-5E5D7DA0E97B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B4E41E52-2EA3-4C08-BEC9-5E5D7DA0E97B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B4E41E52-2EA3-4C08-BEC9-5E5D7DA0E97B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B4E41E52-2EA3-4C08-BEC9-5E5D7DA0E97B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {64432D95-1E92-44FB-9283-A69683BFC61E}
+	EndGlobalSection
+EndGlobal
