@@ -1,32 +1,9 @@
-// Mail Constants:
-// Wheather or not to send a mail to receipients when the pump is activated.
-bool sendMailOnPumpActivation = false;
-// Message to send to all the receipients when the pump is activated, if option for it is true.
-String pumpActivationMessage = "Water level of airconditioning tank have exceded 80% of capacity. Activating pump until empty.";
-// The Warning message to send to all the receipients.
-String warningMessage = "Water level of airconditioning tank have exceded 90% of capacity!";
-// The email addresses of the recipients. Comma (,) seperated.
-String recipients[] = { "mima@steenhoff.dk" };
-// Ip of where the companion Api is being run.
-String ip = "0.0.0.0";
+#include <SPI.h>
+#include <WiFiNINA.h>
 
-// Logic Constants:
-// The digital port number where the input from sensor 1 (0% or more) is.
-int sensorOneInput = 1;
-// The digital port number where the input from sensor 2 (80% or more) is.
-int sensorTwoeInput = 2;
-// The digital port number where the input from sensor 3 (90% or more) is.
-int sensorTreeInput = 3;
-// The digital port number where the output to the pump is.
-int pumpOutput = 4;
-// Delay in ms between checking if any of the sensors has changed their status. 1000 ms = 1 second.
-int delayBetweenChecks = 60000;
-
-// Static Constants - Should (In theory) never be changed.
-// The Https method called on the Api for sending mails.
-String httpMethod = "POST";
-// The Http address called to call the Api
-String httpAddress = ip + "/mail";
+#include "Functions.h"
+#include "Settings.h"
+#include "Secrets.h"
 
 // Variables - Expected to change during code execution
 // The current state of sensor one.
@@ -37,34 +14,49 @@ bool sensorTwoState = false;
 bool sensorThreeState = false;
 // Wheather or not the pump is currently active.
 bool isPumpActive = false;
-
-void mail(String message) {
-  for (int i = 0; i < sizeof(recipients) - 1; i++ )
-  {
-    String input = "?input=" + recipients[i] + "|" + message;
-    String requestAddress = httpAddress + input;
-
-    // INSERT LOGIC TO SEND HTTP POST REQUEST TO API WITH ABOVE ADDRESS
-  }
-  return;
-}
+// simple count for amount of loops it has been throught, for testing.
+int loops = 0;
+// time in ms left for current warning mode.
+int warningModeTimeLeft = 0;
 
 void setup() {
   // put your setup code here, to run once:
+  Serial.begin(9600);
 
+  Serial.println("Setting up Pins...");
+
+  pinMode(sensorOneInput, INPUT);
+  pinMode(sensorTwoeInput, INPUT);
+  pinMode(sensorTreeInput, INPUT);
+  pinMode(pumpOutput, OUTPUT);
+  pinMode(warningOutput, OUTPUT);
+
+  Serial.println("Completed pin setup...");
+  
   // INSERT SETUP LOGIC FOR WIFI
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
 
-  // INSERT LOGIC TO SET STATE FROM SENSORS
+  Serial.println("Loops: " + String(loops));
+
+  sensorOneState = digitalRead(sensorOneInput);
+  sensorTwoState = digitalRead(sensorTwoeInput);
+  sensorThreeState = digitalRead(sensorTreeInput);
+
+  // Write States to Serial, for confirmation.
+  Serial.println("Sensor 1: " + String(sensorOneState));
+  Serial.println("Sensor 2: " + String(sensorTwoState));
+  Serial.println("Sensor 3: " + String(sensorThreeState));
 
   if (isPumpActive == true) // Is the pump Active?
   {
     if (sensorOneState == false) // Should it still be active? No? Then enter and Disable it.
     {
-      // INSERT LOGIC TO DISABLE PUMP
+      Serial.println("Disableing Pump...");
+      // Disables Pump
+      digitalWrite(pumpOutput, LOW);
 
       isPumpActive = false;
     }
@@ -72,20 +64,40 @@ void loop() {
 
   if (sensorOneState == true && sensorTwoState == true) // Should the pump be active? Yes? Then enter and Enable it.
   {
-    // INSERT LOGIC TO ENABLE PUMP
+    Serial.println("Enableing Pump...");
+    // Enables Pump
+    digitalWrite(pumpOutput, HIGH);
 
     isPumpActive = true;
 
     if (sendMailOnPumpActivation) // Should recipients be notified about the pump starting? Yes? Then enter and send a notification mail to recipients.
     {
+      Serial.println("Notifying recipients about Pump activation...");
       mail(pumpActivationMessage);
     }
   }
-  
+
   if (sensorThreeState == true) // Is water not being removed? Yes? Then enter and send a warning mail to recipients.
   {
+    Serial.println("Warning recipients about Tank overflow...");
+    
     mail(warningMessage);
+
+    warningModeTimeLeft = delayAfterWarning;
+
+    while (warningModeTimeLeft > 0) 
+      {
+        digitalWrite(warningOutput, HIGH);
+        delay(delayBetweenWarningBlinks);
+
+        digitalWrite(warningOutput, LOW);
+        delay(delayBetweenWarningBlinks);
+
+        warningModeTimeLeft = warningModeTimeLeft - (2 * delayBetweenWarningBlinks);
+      }
   }
 
   delay(delayBetweenChecks);
+  loops++;
+  Serial.println();
 }
