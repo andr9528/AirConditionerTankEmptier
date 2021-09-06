@@ -14,6 +14,7 @@ const String recipients[] = { "andre@steenhoff.dk" };
 const String arduinoMail = "arduino@steenhoff.dk";
 
 // Logic Constants:
+// Port Constants
 // The digital port number where the input from sensor 1 (0% or more) is.
 const int sensorOneInput = 2;
 // The digital port number where the input from sensor 2 (80% or more) is.
@@ -23,12 +24,26 @@ const int sensorTreeInput = 4;
 // The digital port number where the output to the pump is.
 const int pumpOutput = 5;
 // The digital port number where output to the warning diode is.
-const int warningOutput = 6;
+const int warningDiodeOutput = 6;
+// The digital port number where the state of input input from sensor 1 is shown via a diode.
+const int sensorOneDiodeOutput = 7;
+// The digital port number where the state of input input from sensor 2 is shown via a diode.
+const int sensorTwoDiodeOutput = 8;
+// The digital port number where the state of input input from sensor 3 is shown via a diode.
+const int sensorThreeDiodeOutput = 9;
+// The digital port number where the warning reset button is connected.
+const int warningResetButtonInput = 10;
+// The digital port number where the warning speaker is connected.
+const int warningSpeakerOutput = 11;
+
+// Other Logic related
 // Delay in ms between checking if any of the sensors has changed their status. 1000 ms = 1 second.
 const int delayBetweenChecks = 10000;
 // Delay in ms after sending an warning mail. 1000 ms = 1 second.
 const int delayAfterWarning = 30000; // 3.600.000 = 1 Hour;
 // Delay in ms between blinks while in warning mode after sending an warning mail. 1000 ms = 1 second.
 const int delayBetweenWarningBlinks = 1000;
+// attempts to make when trying to connect to wifi. -1 means infinite.
+const int wifiConnectionAttempts = 6;
 
 #endif

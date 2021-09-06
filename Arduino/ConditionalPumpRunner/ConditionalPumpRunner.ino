@@ -18,29 +18,34 @@ bool isPumpActive = false;
 int loops = 0;
 // time in ms left for current warning mode.
 int warningModeTimeLeft = 0;
+// the state of the warning reset last loop.
+bool warningResetLast = false;
+// the state of the warning reset current loop.
+bool warningResetCurrent = false;
+// wheather or not the warning speaker trigger.
+bool triggerWarningSpeaker = true;
 
-void setup() {
-  // put your setup code here, to run once:
-  Serial.begin(9600);
-
+void setupPins()
+{
   Serial.println("Setting up Pins...");
 
   pinMode(sensorOneInput, INPUT);
   pinMode(sensorTwoeInput, INPUT);
   pinMode(sensorTreeInput, INPUT);
   pinMode(pumpOutput, OUTPUT);
-  pinMode(warningOutput, OUTPUT);
+  pinMode(warningDiodeOutput, OUTPUT);
+  
+  pinMode(sensorOneDiodeOutput, OUTPUT);
+  pinMode(sensorTwoDiodeOutput, OUTPUT);
+  pinMode(sensorThreeDiodeOutput, OUTPUT);
+  pinMode(warningResetButtonInput, INPUT);
+  pinMode(warningSpeakerOutput, OUTPUT);
 
   Serial.println("Completed pin setup...");
-  
-  // INSERT SETUP LOGIC FOR WIFI
 }
 
-void loop() {
-  // put your main code here, to run repeatedly:
-
-  Serial.println("Loops: " + String(loops));
-
+void readSensors() 
+{
   sensorOneState = digitalRead(sensorOneInput);
   sensorTwoState = digitalRead(sensorTwoeInput);
   sensorThreeState = digitalRead(sensorTreeInput);
@@ -49,6 +54,32 @@ void loop() {
   Serial.println("Sensor 1: " + String(sensorOneState));
   Serial.println("Sensor 2: " + String(sensorTwoState));
   Serial.println("Sensor 3: " + String(sensorThreeState));
+
+  digitalWrite(sensorOneDiodeOutput, sensorOneState);
+  digitalWrite(sensorTwoDiodeOutput, sensorTwoState);
+  digitalWrite(sensorThreeDiodeOutput, sensorThreeState);
+}
+
+void setup() {
+  // put your setup code here, to run once:
+  Serial.begin(9600);
+
+  printMac();
+  
+  setupWifi();
+  printIP();
+  printSubnet();
+  printGateway();
+
+  setupPins();
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+
+  Serial.println("Loops: " + String(loops));
+
+  readSensors();
 
   if (isPumpActive == true) // Is the pump Active?
   {
@@ -79,21 +110,34 @@ void loop() {
 
   if (sensorThreeState == true) // Is water not being removed? Yes? Then enter and send a warning mail to recipients.
   {
-    Serial.println("Warning recipients about Tank overflow...");
-    
+    Serial.println("Warning recipients about Tank overflow...");    
     mail(warningMessage);
 
     warningModeTimeLeft = delayAfterWarning;
+    triggerWarningSpeaker = true;
+    warningResetCurrent = false;
+    warningResetLast = false;
 
     while (warningModeTimeLeft > 0) 
-      {
-        digitalWrite(warningOutput, HIGH);
+      { 
+        Serial.println("Warning time Remaining:" + String(warningModeTimeLeft));
+             
+        if(triggerWarningSpeaker == true) digitalWrite(warningSpeakerOutput, HIGH);    
+        digitalWrite(warningDiodeOutput, HIGH);
         delay(delayBetweenWarningBlinks);
 
-        digitalWrite(warningOutput, LOW);
+        if(triggerWarningSpeaker == true) digitalWrite(warningSpeakerOutput, LOW);
+        digitalWrite(warningDiodeOutput, LOW);
         delay(delayBetweenWarningBlinks);
 
         warningModeTimeLeft = warningModeTimeLeft - (2 * delayBetweenWarningBlinks);
+
+        // Holding the reset button for 1 cycle, ie 1 second, diables the speaker. Holding it for 2 cycles, ie 2 seconds, resets the warning completely.
+        warningResetCurrent = digitalRead(warningResetButtonInput);
+        Serial.println("Warning Reset Button Pressed Current: " + String(warningResetCurrent) + "; Warning Reset Button Pressed Last:" + String(warningResetLast));
+        if(warningResetCurrent == true) triggerWarningSpeaker = false;
+        if(warningResetCurrent == true && warningResetLast == true) warningModeTimeLeft = 0;
+        warningResetLast = warningResetCurrent;
       }
   }
 
