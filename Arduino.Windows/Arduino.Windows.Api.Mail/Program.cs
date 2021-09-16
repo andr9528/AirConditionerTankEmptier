@@ -7,7 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace Mail
+namespace Arduino.Windows.Api.Mail
 {
     public class Program
     {

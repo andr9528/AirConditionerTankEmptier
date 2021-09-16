@@ -8,10 +8,8 @@ const bool sendMailOnPumpActivation = false;
 const String pumpActivationMessage = "Water level of airconditioning tank have exceded 80% of capacity. Activating pump until empty.";
 // The Warning message to send to all the receipients.
 const String warningMessage = "Water level of airconditioning tank have exceded 90% of capacity!";
-// The email addresses of the recipients. Comma (,) seperated.
-const String recipients[] = { "andre@steenhoff.dk" };
-// Email of the arduino
-const String arduinoMail = "arduino@steenhoff.dk";
+
+
 
 // Logic Constants:
 // Port Constants

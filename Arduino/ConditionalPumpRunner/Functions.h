@@ -7,10 +7,16 @@
 #include "Settings.h"
 #include "Secrets.h"
 
+// https://forum.arduino.cc/t/string-array-length/153692/6
+// number of items in an array
+#define NUMITEMS(arg) ((unsigned int) (sizeof (arg) / sizeof (arg [0])))
+
 // Simple variable that saves whether there is a valid Wifi module or nor. Used to limit further Wifi activity, if non is present.
 bool wifiModulePresent = false;
 // Status of the wifi connection.
 int wifiStatus = WL_IDLE_STATUS;
+// Wifi client used to connect to Mail server.
+WiFiClient client;
 
 void printMacAddress(byte mac[]) 
 {
@@ -27,16 +33,6 @@ void printMacAddress(byte mac[])
   Serial.println();
 }
 
-void mail(String message) {
-  for (int i = 0; i < sizeof(recipients) - 1; i++ )
-  {
-    // INSERT LOGIC TO SEND SMTP MAIL
-    // https://create.arduino.cc/projecthub/eani/diy-how-to-use-the-arduino-uno-to-send-an-email-or-sms-28ac4d
-  }
-}
-
-
-
 void setupWifi() {
   if(WiFi.status() == WL_NO_MODULE) 
   {
@@ -52,26 +48,74 @@ void setupWifi() {
     if (fv < WIFI_FIRMWARE_LATEST_VERSION)     
       Serial.println("NOTE: Please upgrade the Wifi firmware");
 
-    bool infiteAttempts = false;
+    byte numSsid = WiFi.scanNetworks();
+    Serial.println("Number of available WiFi networks discovered: " + String(numSsid));
+
+    bool infiniteAttempts = false;
     int attempts = 1;
-    if (wifiConnectionAttempts == -1) infiteAttempts = true;
+    if (wifiConnectionAttempts == -1) infiniteAttempts = true;
     
-    char ssid[] = { };    
-    wifiName.toCharArray(ssid, sizeof(wifiName));
-    
-    while (wifiStatus != WL_CONNECTED && (infiteAttempts == true || infiteAttempts == false && attempts <= wifiConnectionAttempts)) 
+    while (wifiStatus != WL_CONNECTED && (infiniteAttempts == true || infiniteAttempts == false && attempts <= wifiConnectionAttempts)) 
     {
       Serial.println("Attempting (#" + String(attempts) + ") to connect to open SSID: " + wifiName);
-      wifiStatus = WiFi.begin(ssid);
+      wifiStatus = WiFi.begin(wifiName);
 
       delay(10000);
       attempts++;
     }
 
-    if (infiteAttempts == false && attempts > wifiConnectionAttempts)     
+    if (infiniteAttempts == false && attempts > wifiConnectionAttempts)     
       Serial.println("WARNING: Failed to connect to wifi in allowed attempts. (Allowed Attempts: " + String(wifiConnectionAttempts) + ")");
     else if (wifiStatus == WL_CONNECTED) Serial.println("INFORMATION: Successfully connected to Wifi.");
   }
+}
+
+
+/*
+ * Values returned by client.connect
+ * 
+ * SUCCESS 1
+ * TIMED_OUT -1
+ * INVALID_SERVER -2
+ * TRUNCATED -3
+ * INVALID_RESPONSE -4
+ */
+
+void mail(String message, bool isWarning) {
+  if (wifiModulePresent == true && wifiStatus != WL_CONNECTED) setupWifi();
+  
+  String subject = "Notification";
+  if(isWarning == true) subject = "WARNING!";
+  
+  int connection = client.connect(mailServer, 25);
+  if (connection == 1) 
+  {
+    Serial.println("INFORMATION: Connected to Server: " + String(mailServer));
+    int recipientsCount = NUMITEMS(recipients);
+    Serial.println("Writing mail to: " + String(recipientsCount) + " recipients.");
+    
+    for (int i = 0; i <= recipientsCount - 1; i++ )
+    {
+      String recipient = recipients[i];
+      Serial.println("Writing mail to: " + recipient);
+
+      // https://www.reddit.com/r/arduino/comments/ep3dhi/send_an_email/
+      Serial.println("Saying Helo to server: " + String(mailServer));
+      
+      client.println("helo " + String(mailServer));
+      client.println("MAIL FROM:" + arduinoMail);
+      client.println("RCPT TO:" + recipient);
+      client.println("data");
+      client.println("Subject:" + subject);
+      client.println("");    
+      client.println(message);
+      client.println("."); 
+    }
+
+    client.println("QUIT");
+    client.println();
+  }
+  else Serial.println("WARNING: Failed to connected to Server: " + String(mailServer) + "; Returned: " + String(connection));
 }
 
 void printIP() 

@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Wolf.Utility.Core.Startup.Assist;
 
-namespace Mail.Controllers
+namespace Arduino.Windows.Api.Mail.Controllers
 {
     [ApiController]
     [Route("[controller]")]

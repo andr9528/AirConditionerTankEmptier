@@ -104,14 +104,14 @@ void loop() {
     if (sendMailOnPumpActivation) // Should recipients be notified about the pump starting? Yes? Then enter and send a notification mail to recipients.
     {
       Serial.println("Notifying recipients about Pump activation...");
-      mail(pumpActivationMessage);
+      mail(pumpActivationMessage, false);
     }
   }
 
   if (sensorThreeState == true) // Is water not being removed? Yes? Then enter and send a warning mail to recipients.
   {
     Serial.println("Warning recipients about Tank overflow...");    
-    mail(warningMessage);
+    mail(warningMessage, true);
 
     warningModeTimeLeft = delayAfterWarning;
     triggerWarningSpeaker = true;

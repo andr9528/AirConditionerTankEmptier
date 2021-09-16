@@ -13,7 +13,7 @@ using Microsoft.Extensions.Logging;
 using Wolf.Utility.Core.Startup;
 using Wolf.Utility.Core.Startup.Modules;
 
-namespace Mail
+namespace Arduino.Windows.Api.Mail
 {
     public class Startup : ModularStartup
     {
