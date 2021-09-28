@@ -12,20 +12,22 @@ namespace Arduino.Windows.Configurator.Persistence.Models
 
         public int Id { get; set; }
         public byte[] Version { get; set; }
+        public SecretsEntity Entity { get; set; }
+        public int EntityId { get; set; }
 
-        private const string RECIPIENTDESC = "// The email addresses of the recipients. Comma (,) seperated.";
+        public const string RECIPIENTDESC = "// The email addresses of the recipients. Comma (,) seperated.";
         private const string RECIPIENTTYPE = "const String recipients[] = ";
         public ICollection<MailRecipient> Recipients { get; set; }
 
-        private const string ARDUINOMAILDESC = "// Email of the arduino.";
+        public const string ARDUINOMAILDESC = "// Email of the arduino.";
         private const string ARDUINOMAILTYPE = "const String arduinoMail = ";
         public string ArduinoMail { get; set; }
 
-        private const string MAILSERVERDESC = "// Name of the mail server to connect to on port 25.";
+        public const string MAILSERVERDESC = "// Name of the mail server to connect to on port 25.";
         private const string MAILSERVERTYPE = "char const mailServer[] = ";
         public string MailServer { get; set; }
 
-        private const string WIFINAMEDESC = "// Name of the wifi network to connect to.";
+        public const string WIFINAMEDESC = "// Name of the wifi network to connect to.";
         private const string WIFINAMETYPE = "char const wifiName[] = ";
         public string WifiName { get; set; }
 
@@ -37,12 +39,34 @@ namespace Arduino.Windows.Configurator.Persistence.Models
         public override void Build(string savePath)
         {
             BuildCheck(savePath);
+            var recipientsBuilder = new StringBuilder();
+
+            recipientsBuilder.Append("{ ");
+            foreach (var recipient in Recipients)
+            {
+                recipientsBuilder.Append($"\"{recipient.Recipient}\", ");
+            }
+            recipientsBuilder.Length--;
+            recipientsBuilder.Length--;
+            recipientsBuilder.Append(" }");
+
             var builder = new StringBuilder();
 
             builder.AppendLine(HEADER());
 
+            builder.AppendLine(RECIPIENTDESC);
+            builder.AppendLine($"{RECIPIENTTYPE}{recipientsBuilder};");
 
+            builder.AppendLine(ARDUINOMAILDESC);
+            builder.AppendLine($"{ARDUINOMAILTYPE}{ArduinoMail};");
 
+            builder.AppendLine(MAILSERVERDESC);
+            builder.AppendLine($"{MAILSERVERTYPE}{MailServer};");
+
+            builder.AppendLine(WIFINAMEDESC);
+            builder.AppendLine($"{WIFINAMETYPE}{WifiName};");
+
+            builder.AppendLine();
             builder.AppendLine(FOOTER);
 
         }
