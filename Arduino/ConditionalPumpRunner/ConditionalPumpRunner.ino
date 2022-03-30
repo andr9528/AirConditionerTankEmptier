@@ -1,4 +1,7 @@
 #include <SPI.h>
+// https://github.com/khoih-prog/WiFiNINA_Generic
+// #include <WiFiNINA_Generic.h>
+// https://github.com/arduino-libraries/WiFiNINA
 #include <WiFiNINA.h>
 
 #include "Functions.h"
@@ -30,8 +33,8 @@ void setupPins()
   Serial.println("Setting up Pins...");
 
   pinMode(sensorOneInput, INPUT);
-  pinMode(sensorTwoeInput, INPUT);
-  pinMode(sensorTreeInput, INPUT);
+  pinMode(sensorTwoInput, INPUT);
+  pinMode(sensorThreeInput, INPUT);
   pinMode(pumpOutput, OUTPUT);
   pinMode(warningDiodeOutput, OUTPUT);
   
@@ -40,6 +43,7 @@ void setupPins()
   pinMode(sensorThreeDiodeOutput, OUTPUT);
   pinMode(warningResetButtonInput, INPUT);
   pinMode(warningSpeakerOutput, OUTPUT);
+  pinMode(wifiConnectedOutput, OUTPUT);  
 
   Serial.println("Completed pin setup...");
 }
@@ -47,8 +51,8 @@ void setupPins()
 void readSensors() 
 {
   sensorOneState = digitalRead(sensorOneInput);
-  sensorTwoState = digitalRead(sensorTwoeInput);
-  sensorThreeState = digitalRead(sensorTreeInput);
+  sensorTwoState = digitalRead(sensorTwoInput);
+  sensorThreeState = digitalRead(sensorThreeInput);
 
   // Write States to Serial, for confirmation.
   Serial.println("Sensor 1: " + String(sensorOneState));
@@ -63,7 +67,8 @@ void readSensors()
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
-
+  Serial.println(softwareVersion);
+  
   printMac();
   
   setupWifi();
@@ -72,12 +77,19 @@ void setup() {
   printGateway();
 
   setupPins();
+  
+  Serial.println();
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
 
   Serial.println("Loops: " + String(loops));
+
+  Serial.println("Checking Wifi Connection...");
+  wifiStatus = WiFi.status();
+
+  if (wifiStatus != WL_CONNECTED) setupWifi();
 
   readSensors();
 
@@ -96,9 +108,17 @@ void loop() {
   if (sensorOneState == true && sensorTwoState == true) // Should the pump be active? Yes? Then enter and Enable it.
   {
     Serial.println("Enableing Pump...");
-    // Enables Pump
-    digitalWrite(pumpOutput, HIGH);
 
+    // Enables Pump
+    if (debugMode == true) 
+    {
+      Serial.println("DEBUG: Simulating Pump... ");
+    }
+    else 
+    {
+      digitalWrite(pumpOutput, HIGH);
+    }
+    
     isPumpActive = true;
 
     if (sendMailOnPumpActivation) // Should recipients be notified about the pump starting? Yes? Then enter and send a notification mail to recipients.

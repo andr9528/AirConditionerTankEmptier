@@ -31,6 +31,8 @@ const int sensorThreeDiodeOutput = 9;
 const int warningResetButtonInput = 10;
 // The digital port number where the warning speaker is connected.
 const int warningSpeakerOutput = 11;
+// The digital port number where the the wifi status is displayed
+const int wifiConnectedOutput = 12;
 
 // Other Logic:
 // Delay in ms between checking if any of the sensors has changed their status. 1000 ms = 1 second.
@@ -41,5 +43,10 @@ const int delayAfterWarning = 30000; // 3.600.000 = 1 Hour;
 const int delayBetweenWarningBlinks = 1000;
 // Attempts to make when trying to connect to wifi. -1 means infinite.
 const int wifiConnectionAttempts = 6;
+// Wheather or not run a select few part or only simulate running them.
+const bool debugMode = false;
+
+// Software Version
+const String softwareVersion = "INFORMATION: Running version 1.0.2";
 
 #endif

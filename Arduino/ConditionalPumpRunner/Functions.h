@@ -2,6 +2,9 @@
 #define _Functions_H
 
 #include <SPI.h>
+// https://github.com/khoih-prog/WiFiNINA_Generic
+// #include <WiFiNINA_Generic.h>
+// https://github.com/arduino-libraries/WiFiNINA
 #include <WiFiNINA.h>
 
 #include "Settings.h"
@@ -34,7 +37,8 @@ void printMacAddress(byte mac[])
 }
 
 void setupWifi() {
-  if(WiFi.status() == WL_NO_MODULE) 
+  wifiStatus = WiFi.status();
+  if(wifiStatus == WL_NO_MODULE) 
   {
     Serial.println("WARNING: Communication with WiFi module failed!");
     wifiModulePresent = false;
@@ -64,9 +68,17 @@ void setupWifi() {
       attempts++;
     }
 
-    if (infiniteAttempts == false && attempts > wifiConnectionAttempts)     
+    if (infiniteAttempts == false && attempts > wifiConnectionAttempts) 
+    {
       Serial.println("WARNING: Failed to connect to wifi in allowed attempts. (Allowed Attempts: " + String(wifiConnectionAttempts) + ")");
-    else if (wifiStatus == WL_CONNECTED) Serial.println("INFORMATION: Successfully connected to Wifi.");
+      digitalWrite(wifiConnectedOutput, LOW);
+    }     
+      
+    else if (wifiStatus == WL_CONNECTED) 
+    {
+      Serial.println("INFORMATION: Successfully connected to Wifi.");
+      digitalWrite(wifiConnectedOutput, HIGH);
+    } 
   }
 }
 
